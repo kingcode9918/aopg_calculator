@@ -6,6 +6,9 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
 BUFF_TYPES = [
     "support_style", "sword_style", "fighting_style", "gun_style",
     "devil_fruit", "suit", "title", "race", "armament_haki", "conqueror_haki",
