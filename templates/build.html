@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Build Selector</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --strengthcolor: #ff0000;
+      --staminacolor: #55aaff;
+      --defensecolor: #00ff00;
+      --swordcolor: #ffff7f;
+      --guncolor: #ffff00;
+      --hakicolor: #aa00aa;
+      --fruitcolor: #ff00bf;
+    }
+    .strength { color: var(--strengthcolor); }
+    .stamina { color: var(--staminacolor); }
+    .defense { color: var(--defensecolor); }
+    .sword { color: var(--swordcolor); }
+    .gun { color: var(--guncolor); }
+    .haki { color: var(--hakicolor); }
+    .fruit { color: var(--fruitcolor); }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+<div class="max-w-7xl mx-auto p-6 space-y-8">
+
+<h1 class="text-3xl font-bold text-center mb-6">Build Selector</h1>
+
+<form method="POST" class="space-y-6">
+
+  <!-- Totals at top -->
+  <div class="grid grid-cols-2 gap-4 mb-4">
+
+    <!-- Accessories Totals -->
+    <div class="bg-gray-700 p-2 rounded">
+      <h3 class="font-medium mb-1 text-sm">Accessory Totals</h3>
+      <div class="grid grid-cols-2 gap-1">
+        {% for stat, val in accessory_values.items() %}
+          <div class="{{ stat }} font-semibold text-xs leading-tight">
+            {{ stat | capitalize }}: {{ val }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Buff Totals -->
+    <div class="bg-gray-700 p-2 rounded">
+      <h3 class="font-medium mb-1 text-sm">Buff Totals</h3>
+      <div class="grid grid-cols-2 gap-1">
+        {% for stat, val in buff_values.items() %}
+          <div class="{{ stat }} font-bold text-lg leading-tight">
+            {{ stat | capitalize }}: {{ val }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="mb-4 flex justify-between">
+    <button name="best" value="strength"
+      class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded font-semibold strength w-full">
+      Best Strength
+    </button>
+
+    <button name="best" value="sword"
+      class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded font-semibold sword w-full">
+      Best Sword
+    </button>
+
+    <button name="best" value="gun"
+      class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded font-semibold gun w-full">
+      Best Gun
+    </button>
+
+    <button name="best" value="fruit"
+      class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded font-semibold fruit w-full">
+      Best Fruit
+    </button>
+  </div>
+
+  <div class="flex flex-col md:flex-row gap-4">
+
+    <!-- Main Buffs -->
+    <div class="bg-gray-800 p-4 rounded-xl space-y-3 flex-1">
+      <h2 class="font-semibold text-lg">Main Buffs</h2>
+      <div class="flex flex-col gap-3">
+        {% for buff_type in main_buffs %}
+          <div>
+            <label class="block font-medium">{{ buff_type | capitalize }}</label>
+            <select name="{{ buff_type }}" class="w-full bg-gray-700 px-2 py-2 rounded">
+              <option value="">-- None --</option>
+              {% for item in items %}
+                {% if item.category == 'buff' and item.type == buff_type %}
+                  <option value="{{ item.name }}" {% if selected.get(buff_type) == item.name %}selected{% endif %}>
+                    {{ item.name }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            {% for item in items %}
+              {% if item.category == 'buff' and item.type == buff_type and selected.get(buff_type) == item.name %}
+                <span class="strength">💪{{ item.values_dict()["strength"] }}x</span>
+                <span class="sword">⚔️{{ item.values_dict()["sword"] }}x</span>
+                <span class="gun">🔫{{ item.values_dict()["gun"] }}x</span>
+                <span class="fruit">🍎{{ item.values_dict()["fruit"] }}x</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Other Buffs -->
+    <div class="bg-gray-800 p-4 rounded-xl space-y-3 flex-1">
+      <h2 class="font-semibold text-lg">Other Buffs</h2>
+      <div class="flex flex-col gap-3">
+        {% for buff_type in other_buffs %}
+          <div>
+            <label class="block font-medium">{{ buff_type | capitalize }}</label>
+            <select name="{{ buff_type }}" class="w-full bg-gray-700 px-2 py-2 rounded">
+              <option value="">-- None --</option>
+              {% for item in items %}
+                {% if item.category == 'buff' and item.type == buff_type %}
+                  <option value="{{ item.name }}" {% if selected.get(buff_type) == item.name %}selected{% endif %}>
+                    {{ item.name }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            {% for item in items %}
+              {% if item.category == 'buff' and item.type == buff_type and selected.get(buff_type) == item.name %}
+                <span class="strength">💪{{ item.values_dict()["strength"] }}x</span>
+                <span class="sword">⚔️{{ item.values_dict()["sword"] }}x</span>
+                <span class="gun">🔫{{ item.values_dict()["gun"] }}x</span>
+                <span class="fruit">🍎{{ item.values_dict()["fruit"] }}x</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Accessories -->
+  <div class="flex flex-col md:flex-row gap-4 mt-4">
+
+    <!-- First Group -->
+    <div class="bg-gray-800 p-4 rounded-xl space-y-3 flex-1">
+      <h2 class="font-semibold text-lg">Accessories: Hat, Top, Arm</h2>
+      <div class="flex flex-col gap-3">
+        {% for slot in first_group %}
+          <div>
+            <label class="block font-medium">{{ slot | capitalize }}</label>
+            <select name="{{ slot }}" class="w-full bg-gray-700 px-2 py-2 rounded">
+              <option value="">-- None --</option>
+              {% for item in items %}
+                {% if item.category == 'accessory' and item.type == slot %}
+                  <option value="{{ item.name }}" {% if selected.get(slot) == item.name %}selected{% endif %}>
+                    {{ item.name }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            {% for item in items %}
+              {% if item.category == 'accessory' and item.type == slot and selected.get(slot) == item.name %}
+                <div class="flex gap-2 mt-1">
+                  <span class="strength">💪{{ item.values_dict()["strength"] }}</span>
+                  <span class="stamina">🏃{{ item.values_dict()["stamina"] }}</span>
+                  <span class="defense">🛡️{{ item.values_dict()["defense"] }}</span>
+                  <span class="sword">⚔️{{ item.values_dict()["sword"] }}</span>
+                  <span class="gun">🔫{{ item.values_dict()["gun"] }}</span>
+                  <span class="haki">✨{{ item.values_dict()["haki"] }}</span>
+                  <span class="fruit">🍎{{ item.values_dict()["fruit"] }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Second Group -->
+    <div class="bg-gray-800 p-4 rounded-xl space-y-3 flex-1">
+      <h2 class="font-semibold text-lg">Accessories: Back, Waist, Bottom</h2>
+      <div class="flex flex-col gap-3">
+        {% for slot in second_group %}
+          <div>
+            <label class="block font-medium">{{ slot | capitalize }}</label>
+            <select name="{{ slot }}" class="w-full bg-gray-700 px-2 py-2 rounded">
+              <option value="">-- None --</option>
+              {% for item in items %}
+                {% if item.category == 'accessory' and item.type == slot %}
+                  <option value="{{ item.name }}" {% if selected.get(slot) == item.name %}selected{% endif %}>
+                    {{ item.name }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            {% for item in items %}
+              {% if item.category == 'accessory' and item.type == slot and selected.get(slot) == item.name %}
+                <div class="flex gap-2 mt-1">
+                  <span class="strength">💪{{ item.values_dict()["strength"] }}</span>
+                  <span class="stamina">🏃{{ item.values_dict()["stamina"] }}</span>
+                  <span class="defense">🛡️{{ item.values_dict()["defense"] }}</span>
+                  <span class="sword">⚔️{{ item.values_dict()["sword"] }}</span>
+                  <span class="gun">🔫{{ item.values_dict()["gun"] }}</span>
+                  <span class="haki">✨{{ item.values_dict()["haki"] }}</span>
+                  <span class="fruit">🍎{{ item.values_dict()["fruit"] }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <div>
+    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded mt-4">Compute Stats</button>
+  </div>
+
+</form>
+
+</div>
+</body>
+</html>

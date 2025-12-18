@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Buff & Accessory Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #171717;
+      --strengthcolor: #ff0000;
+      --staminacolor: #55aaff;
+      --defensecolor: #00ff00;
+      --swordcolor: #ffff7f;
+      --guncolor: #ffff00;
+      --hakicolor: #aa00aa;
+      --fruitcolor: #ff00bf;
+    }
+
+    .strength { color: var(--strengthcolor); }
+    .stamina { color: var(--staminacolor); }
+    .defense { color: var(--defensecolor); }
+    .sword { color: var(--swordcolor); }
+    .gun { color: var(--guncolor); }
+    .haki { color: var(--hakicolor); }
+    .fruit { color: var(--fruitcolor); }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+
+<div class="max-w-7xl mx-auto p-6 space-y-8">
+
+  <div class="flex items-center justify-between gap-4">
+    <h1 class="text-3xl font-bold">Buff & Accessory Manager</h1>
+    <a href="/"
+       class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm font-semibold">
+      Go to Build
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Buff Form -->
+    <form action="/add-buff" method="post"
+          class="bg-gray-800 p-4 rounded-xl space-y-3">
+      <h2 class="font-semibold text-lg">
+        {{ 'Edit Buff' if item_to_edit and item_to_edit.category=='buff' else 'Add Buff' }}
+      </h2>
+
+      <label>Name:</label>
+      <input name="name" required placeholder="Buff Name"
+             class="w-full bg-gray-700 px-3 py-2 rounded"
+             value="{{ item_to_edit.name if item_to_edit and item_to_edit.category=='buff' else '' }}">
+
+      <label>Type:</label>
+      <select name="type" class="w-full bg-gray-700 px-2 py-2 rounded">
+        {% for t in buff_types %}
+        <option value="{{ t }}"
+          {% if item_to_edit and item_to_edit.category=='buff' and item_to_edit.type==t %}selected{% endif %}>
+          {{ t }}
+        </option>
+        {% endfor %}
+      </select>
+
+      <input type="hidden" name="index" value="{{ edit_index if item_to_edit else '' }}">
+
+      {% set separate = item_to_edit and item_to_edit.category=='buff' and item_to_edit.values_dict()|length>1 %}
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" name="separate" value="1" id="separate_toggle" {% if separate %}checked{% endif %}>
+        <span>Separate multipliers for each stat</span>
+      </label>
+
+      <!-- Unified Value -->
+      <div id="unified_input" class="space-y-2 {% if separate %}hidden{% endif %}">
+        <label>All Stats:</label>
+        <input type="number" step="0.01" name="all_value"
+               value="{% if item_to_edit and item_to_edit.category=='buff' and not separate %}{{ item_to_edit.fruit }}{% else %}1{% endif %}"
+               class="w-full bg-gray-700 px-3 py-2 rounded"
+               placeholder="Value for all stats">
+      </div>
+
+      <!-- Separate Inputs -->
+      <div id="separate_inputs" class="space-y-2 {% if not separate %}hidden{% endif %}">
+        {% for stat in ["fruit","sword","gun","strength"] %}
+        <label class="{{ stat }}">{{ stat | capitalize }}:</label>
+        <input type="number" step="0.01" name="{{ stat }}"
+               value="{% if item_to_edit and item_to_edit.category=='buff' %}{{ item_to_edit.values_dict()[stat] }}{% else %}1{% endif %}"
+               class="w-full bg-gray-700 px-3 py-2 rounded {{ stat }}">
+        {% endfor %}
+      </div>
+
+      <button class="w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded">
+        {{ 'Save Buff' if item_to_edit and item_to_edit.category=='buff' else 'Add Buff' }}
+      </button>
+    </form>
+
+    <!-- Accessory Form -->
+    <form action="/add-accessory" method="post"
+          class="bg-gray-800 p-4 rounded-xl space-y-3">
+      <h2 class="font-semibold text-lg">
+        {{ 'Edit Accessory' if item_to_edit and item_to_edit.category=='accessory' else 'Add Accessory' }}
+      </h2>
+
+      <label>Name:</label>
+      <input name="name" required placeholder="Accessory Name"
+             class="w-full bg-gray-700 px-3 py-2 rounded"
+             value="{{ item_to_edit.name if item_to_edit and item_to_edit.category=='accessory' else '' }}">
+
+      <label>Slot:</label>
+      <select name="type" class="w-full bg-gray-700 px-2 py-2 rounded">
+        {% for t in accessory_types %}
+        <option value="{{ t }}"
+          {% if item_to_edit and item_to_edit.category=='accessory' and item_to_edit.type==t %}selected{% endif %}>
+          {{ t }}
+        </option>
+        {% endfor %}
+      </select>
+
+      <input type="hidden" name="index" value="{{ edit_index if item_to_edit else '' }}">
+
+      {% for stat in ["strength","stamina","defense","sword","gun","haki","fruit"] %}
+      <label class="{{ stat }}">{{ stat | capitalize }}:</label>
+      <input name="{{ stat }}" type="number"
+             value="{% if item_to_edit and item_to_edit.category=='accessory' %}{{ item_to_edit.values_dict()[stat] }}{% else %}0{% endif %}"
+             class="w-full bg-gray-700 px-3 py-2 rounded {{ stat }}">
+      {% endfor %}
+
+      <button class="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded">
+        {{ 'Save Accessory' if item_to_edit and item_to_edit.category=='accessory' else 'Add Accessory' }}
+      </button>
+    </form>
+
+  </div>
+
+  <!-- Items Table -->
+  <div class="overflow-x-auto">
+    <table class="w-full border border-gray-700 rounded-xl">
+      <thead class="bg-gray-800">
+        <tr>
+          <th class="p-2">Name</th>
+          <th>Category</th>
+          <th>Type / Slot</th>
+          <th>Values</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr class="border-t border-gray-700 text-center">
+          <td class="p-2">{{ item.name }}</td>
+          <td>{{ item.category }}</td>
+          <td>{{ item.type }}</td>
+          <td class="text-left p-2">
+            {% for k,v in item.values_dict().items() %}
+              <span class="{{ k }} mr-2">{{ k | capitalize }}: {{ v }}</span>
+            {% endfor %}
+          </td>
+          <td>
+            <a href="/?edit={{ item.id }}" class="text-blue-400 hover:underline">Edit</a> |
+            <a href="/delete/{{ item.id }}" class="text-red-400 hover:underline">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const toggle = document.getElementById("separate_toggle");
+const unified = document.getElementById("unified_input");
+const separate = document.getElementById("separate_inputs");
+
+toggle.addEventListener("change", () => {
+  if (toggle.checked) {
+    unified.classList.add("hidden");
+    separate.classList.remove("hidden");
+  } else {
+    separate.classList.add("hidden");
+    unified.classList.remove("hidden");
+  }
+});
+</script>
+
+</body>
+</html>
