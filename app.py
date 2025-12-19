@@ -80,52 +80,73 @@ def add_buff():
         val = float(request.form.get("all_value", 1.0))
         values = {"fruit": val, "sword": val, "gun": val, "strength": val}
 
-    if index:
-        item = Item.query.get(index)
-        if item:
+    try:
+        if index is not None:
+            item = Item.query.get(index)
+            if not item:
+                return redirect(url_for("index"))
+
             item.name = request.form["name"]
             item.type = request.form["type"]
             item.strength = values["strength"]
             item.sword = values["sword"]
             item.gun = values["gun"]
             item.fruit = values["fruit"]
-    else:
-        item = Item(
-            category="buff",
-            name=request.form["name"],
-            type=request.form["type"],
-            strength=values["strength"],
-            sword=values["sword"],
-            gun=values["gun"],
-            fruit=values["fruit"]
-        )
-        db.session.add(item)
 
-    db.session.commit()
+        else:
+            item = Item(
+                category="buff",
+                name=request.form["name"],
+                type=request.form["type"],
+                strength=values["strength"],
+                sword=values["sword"],
+                gun=values["gun"],
+                fruit=values["fruit"]
+            )
+            db.session.add(item)
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("BUFF SAVE ERROR:", e)
+
     return redirect(url_for("index"))
 
 @app.route("/add-accessory", methods=["POST"])
 def add_accessory():
     index = request.form.get("index", type=int)
-    values = {stat: float(request.form.get(stat, 0)) for stat in ["strength","stamina","defense","sword","gun","haki","fruit"]}
+    values = {
+        stat: float(request.form.get(stat, 0))
+        for stat in ["strength","stamina","defense","sword","gun","haki","fruit"]
+    }
 
-    if index:
-        item = Item.query.get(index)
-        if item:
+    try:
+        if index is not None:
+            item = Item.query.get(index)
+            if not item:
+                return redirect(url_for("index"))
+
             item.name = request.form["name"]
             item.type = request.form["type"]
             for stat, val in values.items():
                 setattr(item, stat, val)
-    else:
-        item = Item(
-            category="accessory",
-            name=request.form["name"],
-            type=request.form["type"],
-            **values
-        )
-        db.session.add(item)
 
-    db.session.commit()
+        else:
+            item = Item(
+                category="accessory",
+                name=request.form["name"],
+                type=request.form["type"],
+                **values
+            )
+            db.session.add(item)
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("ACCESSORY SAVE ERROR:", e)
+
     return redirect(url_for("index"))
 
 @app.route("/delete/<int:index>")

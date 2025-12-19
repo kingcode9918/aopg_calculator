@@ -1,12 +1,12 @@
 import os
 
-# BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
-# class Config:
-#     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'app.db')}")
-#     SQLALCHEMY_TRACK_MODIFICATIONS = False
-#     SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key")
-
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or "sqlite:///local.db"
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///local.db")
+
+    # 🔴 REQUIRED for Render Postgres
+    if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace(
+            "postgres://", "postgresql://", 1
+        )
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
